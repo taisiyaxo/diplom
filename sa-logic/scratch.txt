@@ -1,0 +1,244 @@
+from flask import Flask, request, jsonify, send_file
+import pandas as pd
+import os
+import io
+
+# Импорт для работы с nltk и RAKE
+import nltk
+from nltk.corpus import stopwords
+from rake_nltk import Rake
+
+# Если стоп-слова ещё не скачаны – скачиваем.
+nltk.download('stopwords')
+russian_stopwords = stopwords.words("russian")
+
+# Функция для извлечения ключевых тем из группы отзывов с использованием RAKE.
+def extract_topics_from_group(reviews, top_n=5):
+    """
+    Объединяет список отзывов в один текст и извлекает ключевые фразы.
+    Возвращает список словарей вида {"topic": phrase, "frequency": score}.
+    """
+    if not reviews:
+        return []
+    text = " ".join(reviews)
+    r = Rake(stopwords=russian_stopwords)
+    r.extract_keywords_from_text(text)
+    # Получаем ранжированные фразы (score, phrase)
+    ranked_phrases = r.get_ranked_phrases_with_scores()
+    # Выберем top_n фраз
+    topics = []
+    for score, phrase in ranked_phrases[:top_n]:
+        topics.append({"topic": phrase, "frequency": round(score, 1)})
+    return topics
+
+# Функция для генерации рекомендаций на основе негативных тем.
+def generate_recommendations(negative_topics):
+    recommendations = []
+    for topic in negative_topics:
+        t = topic.get("topic", "").lower()
+        if "сборк" in t:
+            recommendations.append("Улучшить качество сборки изделия.")
+        elif "управлен" in t or "интерфейс" in t:
+            recommendations.append("Оптимизировать управление и сделать интерфейс более интуитивным.")
+        elif "описан" in t:
+            recommendations.append("Пересмотреть описание товара, выделив ключевые преимущества.")
+        elif "качество" in t:
+            recommendations.append("Проверить качество материалов и отделки.")
+    # Если рекомендаций не выявлено, можно добавить общую
+    if not recommendations:
+        recommendations.append("Провести детальный анализ отзывов для выявления проблемных зон.")
+    # Убираем дубликаты
+    return list(set(recommendations))
+
+# Функция для формирования текстового отчета.
+def generate_text_report(reviews, sentiments, topics_by_sentiment, recommendations):
+    total = len(reviews)
+    positive = sentiments.count("positive")
+    negative = sentiments.count("negative")
+    neutral = sentiments.count("neutral")
+
+    positive_percent = round((positive / total * 100), 1) if total > 0 else 0
+    negative_percent = round((negative / total * 100), 1) if total > 0 else 0
+    neutral_percent  = round((neutral  / total * 100), 1) if total > 0 else 0
+
+    lines = []
+    lines.append("Отчет по отзывам покупателей")
+    lines.append("=" * 40)
+    lines.append("")
+
+    lines.append("Общая статистика:")
+    lines.append(f"  Общее количество отзывов: {total}")
+    lines.append(f"  Позитивные: {positive} ({positive_percent}%)")
+    lines.append(f"  Негативные: {negative} ({negative_percent}%)")
+    lines.append(f"  Нейтральные: {neutral} ({neutral_percent}%)")
+    lines.append("")
+
+    lines.append("Ключевые темы по категориям:")
+    for category in ["positive", "negative", "neutral"]:
+        lines.append(f"{category.capitalize()} темы:")
+        topics = topics_by_sentiment.get(category, [])
+        if topics:
+            for topic in topics:
+                lines.append(f"  - {topic.get('topic', 'Не указано')} (score: {topic.get('frequency', '?')})")
+        else:
+            lines.append("  Нет значимых тем.")
+        lines.append("")
+
+    lines.append("Рекомендации по улучшению товара:")
+    if recommendations:
+        for rec in recommendations:
+            lines.append(f"  - {rec}")
+    else:
+        lines.append("  Рекомендаций не выявлено.")
+    lines.append("")
+
+    lines.append("Заключение:")
+    lines.append("  Анализ отзывов помогает выявить ключевые проблемы и пожелания покупателей,")
+    lines.append("  что позволит предприятию скорректировать продукт и улучшить качество обслуживания.")
+
+    return "\n".join(lines)
+
+# Импорт DeepPavlov и загрузка модели сентимент-анализа
+from deeppavlov import build_model, configs
+sentiment_model = build_model(configs.classifiers.rusentiment_bert, download=True)
+
+# Инициализируем Flask-приложение
+app = Flask(__name__)
+
+# Эндпоинт для анализа одного текстового отзыва
+@app.route("/analyse/sentiment", methods=["POST"])
+def analyse_single_sentiment():
+    data = request.get_json()
+    if not data or "sentence" not in data:
+        return jsonify({"error": "No sentence provided."}), 400
+    sentence = data.get("sentence", "")
+    sentiment = sentiment_model([sentence])[0]
+    return jsonify({"sentence": sentence, "sentiment": sentiment})
+
+# Вспомогательная функция для загрузки файла разных форматов
+def load_reviews_from_file(file_storage):
+    filename = file_storage.filename.lower()
+    # Если CSV
+    if filename.endswith(".csv"):
+        df = pd.read_csv(file_storage)
+    # Если Excel
+    elif filename.endswith(".xls") or filename.endswith(".xlsx"):
+        df = pd.read_excel(file_storage)
+    # Если текстовый файл – каждая строка считается отзывом
+    elif filename.endswith(".txt"):
+        # Читаем содержимое и делим по новой строке
+        content = file_storage.read().decode("utf-8")
+        reviews = [line.strip() for line in content.splitlines() if line.strip()]
+        df = pd.DataFrame({"review": reviews})
+    else:
+        raise ValueError("Unsupported file format.")
+    # Проверяем, есть ли колонка 'review'. Если нет, попытка взять первый текстовый столбец.
+    if "review" not in df.columns:
+        for col in df.columns:
+            if df[col].dtype == object:
+                df.rename(columns={col: "review"}, inplace=True)
+                break
+        if "review" not in df.columns:
+            raise ValueError("No text column found in file.")
+    return df
+
+# Эндпоинт для загрузки файла с отзывами и формирования отчёта
+@app.route("/upload_reviews", methods=["POST"])
+def upload_reviews():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided."}), 400
+    file = request.files['file']
+
+    try:
+        df = load_reviews_from_file(file)
+    except Exception as e:
+        return jsonify({"error": f"Error processing file: {e}"}), 400
+
+    reviews = df['review'].tolist()
+    # Получаем тональность для каждого отзыва
+    sentiments = sentiment_model(reviews)
+
+    # Группируем отзывы по сентименту
+    groups = {"positive": [], "negative": [], "neutral": []}
+    for review, sent in zip(reviews, sentiments):
+        if sent in groups:
+            groups[sent].append(review)
+        else:
+            # Если какая-то категория не попадает в три основных, добавляем в neutral
+            groups["neutral"].append(review)
+
+    # Для каждой категории извлекаем темы
+    topics_by_sentiment = {}
+    for cat, texts in groups.items():
+        topics_by_sentiment[cat] = extract_topics_from_group(texts, top_n=5)
+
+    # На основе негативных тем формируем рекомендации
+    recommendations = generate_recommendations(topics_by_sentiment.get("negative", []))
+
+    # Формируем текстовый отчет
+    report_text = generate_text_report(reviews, sentiments, topics_by_sentiment, recommendations)
+    report_path = "report.txt"
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write(report_text)
+
+    # Формируем список результатов для каждого отзыва
+    results = [{"review": rev, "sentiment": sent} for rev, sent in zip(reviews, sentiments)]
+
+    return jsonify({
+        "message": "File processed successfully.",
+        "num_reviews": len(reviews),
+        "results": results,
+        "report_text": report_text
+    })
+
+# Эндпоинт для скачивания отчёта в виде текстового файла
+@app.route("/download_report", methods=["GET"])
+def download_report():
+    report_path = "report.txt"
+    if os.path.exists(report_path):
+        return send_file(report_path, as_attachment=True)
+    else:
+        return jsonify({"error": "Report file not found."}), 404
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+
+
+
+from flask import Flask, request, jsonify
+from deeppavlov import build_model, configs
+
+app = Flask(__name__)
+
+model = build_model(configs.classifiers.rusentiment_convers_bert, download=True)
+
+@app.route("/analyse/sentiment", methods=["POST"])
+def analyse_sentiment():
+    data = request.get_json()
+
+    # Проверяем, массив или один объект
+    if isinstance(data, dict):
+        # один объект
+        sentence = data.get("sentence", "")
+        sentiment = model([sentence])[0]
+        return jsonify({
+            "sentence": sentence,
+            "sentiment": sentiment
+        })
+    elif isinstance(data, list):
+        # массив { "sentence": ... }
+        responses = []
+        for item in data:
+            sentence = item.get("sentence", "")
+            sentiment = model([sentence])[0]
+            responses.append({
+                "sentence": sentence,
+                "sentiment": sentiment
+            })
+        return jsonify(responses)
+    else:
+        return jsonify({"error": "Invalid format"}), 400
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

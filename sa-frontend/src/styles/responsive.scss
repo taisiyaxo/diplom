@@ -1,0 +1,194 @@
+/* ==== Responsive для ноутбуков ==== */
+
+/* ---- Ноутбуки до 1440px ---- */
+@media (max-width: 1440px) {
+    .app {
+      padding: 32px 16px;
+  
+      .header {
+        margin-bottom: 32px;
+  
+        h1 {
+          font-size: 18px;
+        }
+  
+        .mode-switch {
+          gap: 20px;
+          width: 400px;
+          height: 80px;
+  
+          button {
+            width: 180px;
+            height: 64px;
+            font-size: 20px;
+            padding: 16px 24px;
+          }
+        }
+      }
+  
+      .main {
+        gap: 60px;
+      }
+    }
+  
+    .emotion-card {
+      width: 380px;
+      height: 380px;
+      .emoji-icon {
+        width: 130px;
+        height: 130px;
+      }
+      p {
+        font-size: 26px;
+      }
+    }
+  
+    .text-input {
+      textarea {
+        height: 380px;
+        font-size: 22px;
+      }
+      .analyze-button {
+        width: 320px;
+        height: 72px;
+        font-size: 22px;
+        padding: 20px 16px;
+      }
+    }
+  
+    .file-uploader {
+      .zones {
+        gap: 30px;
+        padding: 32px 40px;
+        width: calc(680px * 2 + 30px);
+      }
+      .zone {
+        width: 680px;
+        height: 420px;
+      }
+      .zone--file-info {
+        width: calc(680px * 2 + 30px);
+      }
+      .action-btn {
+        width: 320px;
+        height: 72px;
+      }
+    }
+  }
+  
+  /* ---- Планшеты/компакты до 1200px ---- */
+  @media (max-width: 1200px) {
+    .app {
+      .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+  
+        .mode-switch {
+          width: 100%;
+          max-width: 360px;
+        }
+      }
+  
+      .main {
+        flex-direction: column;
+        gap: 40px;
+      }
+    }
+  
+    .emotion-card {
+      width: 320px;
+      height: 320px;
+      .emoji-icon {
+        width: 110px;
+        height: 110px;
+      }
+      p {
+        font-size: 24px;
+      }
+    }
+  
+    .text-input {
+      textarea {
+        height: 320px;
+      }
+      .analyze-button {
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+  
+    .file-uploader {
+      .zones {
+        flex-direction: column;
+        gap: 32px;
+        width: 100%;
+        max-width: 720px;
+        padding: 24px 32px;
+      }
+      .zone {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+      }
+      .zone--file-info {
+        width: 100%;
+        max-width: 100%;
+      }
+      .action-btn {
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+  }
+  
+  /* ---- Мобильные до 800px (если потребуется) ---- */
+  @media (max-width: 800px) {
+    .app {
+      padding: 20px 10px;
+  
+      .header {
+        h1 { font-size: 1.25rem; }
+        .mode-switch {
+          gap: 12px;
+          width: 100%;
+          height: auto;
+          button {
+            width: 45%;
+            height: 56px;
+            font-size: 16px;
+            padding: 12px;
+          }
+        }
+      }
+  
+      .main {
+        gap: 24px;
+      }
+    }
+  
+    .emotion-card {
+      width: 260px;
+      height: 260px;
+      .emoji-icon { width: 80px; height: 80px; }
+      p { font-size: 1rem; }
+    }
+  
+    .text-input {
+      textarea { height: 200px; font-size: 1rem; }
+      .analyze-button { width: 100%; font-size: 1rem; padding: 12px; }
+    }
+  
+    .file-uploader {
+      .zones {
+        padding: 16px;
+        gap: 16px;
+      }
+      .zone {
+        width: 100%;
+        height: auto;
+      }
+      .action-btn { width: 100%; font-size: 1rem; padding: 12px; }
+    }
+  }
+  

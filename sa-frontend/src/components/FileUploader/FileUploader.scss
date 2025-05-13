@@ -1,0 +1,233 @@
+.file-uploader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  /* === инструкции 1–2–3 сверху === */
+  .steps {
+    display: flex;
+    gap: 80px;
+    margin-bottom: 24px;
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+
+      span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 2px solid #7B3AED;
+        border-radius: 50%;
+        color: #7B3AED;
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      p {
+        max-width: 200px;
+        font-size: 16px;
+        color: #333;
+      }
+    }
+  }
+
+  .zones {
+    display: flex;
+    gap: 37px;                /* теперь именно 37px между карточками */
+    width: calc(743.5px * 2 + 37px);
+    padding: 41px 54px;
+    border-radius: 30px;
+    position: relative;
+    justify-content: center;
+
+
+    .zone {
+      width: 743.5px;         /* фиксированная ширина каждой карточки */
+      height: 458px;
+      background: #F9F4F4;
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      text-align: center;
+      transition: all 0.3s;
+      box-shadow: 10px 5px 15px #959da533;
+
+      img {
+        width: 156px;
+        height: 156px;
+      }
+      p {
+        font-size: 24px;
+        color: #333;
+      }
+    }
+
+    /* Кнопка Browse внутри второй карточки */
+    .zone--browse .browse-button {
+      margin-top: 8px;
+      background: #7B3AED;
+      color: #fff;
+      border: none;
+      border-radius: 30px;
+      padding: 12px 32px;
+      font-size: 20px;
+      cursor: pointer;
+      position: relative;
+
+      input[type='file'] {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+    }
+
+    &.zones--active {
+      background: #7B3AED;
+  
+      /* скрываем обе обычные zone */
+      .zone { display: none; }
+  
+      /* показываем единственную drag-active и делаем её прозрачной */
+      .zone--drag-active {
+        display: flex;
+        width: 100%;
+        background: transparent;      // <- убираем светлый фон
+        color: #fff;
+  
+        img, p {
+          filter: brightness(0) invert(1);
+        }
+      }
+    }
+
+
+    .zone--file-info {
+      grid-column: 1 / -1;
+      background: #fff;
+      width: 738px;
+      height: 112px;
+      border-radius: 12px;
+      padding: 12px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      .filename {
+        display: flex;
+        font-size: 20px;
+        color: #333;
+        font-weight: bold;
+      }
+
+      button {
+        background: none;
+        border: none;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #7C3AED;
+        // box-shadow: 10px 5px 15px #959da533;
+      }
+      img{
+        width: 63px;
+        height: 63px;
+      }
+    }
+
+    .zone--loading {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+
+      .spinner {
+        border: 4px solid rgba(255,255,255,0.3);
+        border-top: 4px solid #fff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 12px;
+      }
+
+      p {
+        font-size: 24px;
+      }
+    }
+  }
+  /* ------------------------------------------------ */
+/* кнопки Проанализировать / Немного подождите / Скачать */
+/* ------------------------------------------------ */
+.action-btn {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;              // расстояние между спиннером и текстом
+  width: 348px;
+  height: 81px;
+  border-radius: 80px;
+  padding: 24px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.3s;
+  box-shadow: 10px 5px 15px #959da533;
+
+  &.analyze-btn {
+    background: #7B3AED;
+    color: #fff;
+
+    &:hover { background: #A273F2; }
+
+    &.loading {
+      background: #EFE8FD;
+      color: #333;
+
+      &:hover { background: #E0DBF5; }
+
+      .spinner.small {
+        border: 4px solid rgba(0,0,0,0.1);
+        border-top: 4px solid #333;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  &.download-btn {
+    background: #7B3AED;
+    color: #fff;
+
+    &:hover { background: #A273F2; }
+  }
+}
+
+/* маленький спиннер для кнопки */
+.spinner.small {
+  border: 4px solid rgba(255,255,255,0.3);
+  border-top: 4px solid #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+}
+
+/* анимация спиннера */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

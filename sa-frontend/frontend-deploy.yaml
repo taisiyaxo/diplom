@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sa-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sa-frontend
+  template:
+    metadata:
+      labels:
+        app: sa-frontend
+    spec:
+      containers:
+        - name: sa-frontend
+          image: sa-frontend:latest
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sa-frontend
+spec:
+  selector:
+    app: sa-frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: NodePort

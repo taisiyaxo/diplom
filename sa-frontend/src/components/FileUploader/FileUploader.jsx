@@ -6,10 +6,8 @@ import fileIcon from '../../assets/icons/file.svg';
 export default class FileUploader extends Component {
   state = {
     dragActive: false,
-    fileName: '',
-    fileContent: '',
-    loading: false, // чтение файла
-    analyzeState: '', // '' | 'loading' | 'done'
+    file: null,
+    analyzed: false
   };
 
   onDragEnter = (e) => {
@@ -27,53 +25,29 @@ export default class FileUploader extends Component {
     e.preventDefault();
     this.setState({ dragActive: false }, () => {
       const file = e.dataTransfer.files[0];
-      this.readFile(file);
+      this.setState({ file });
     });
   };
 
   onFileChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    this.readFile(file);
+    if (file) this.setState({ file });
   };
 
-  readFile(file) {
-    this.setState({ loading: true, analyzeState: '' });
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      this.setState({
-        fileName: file.name,
-        fileContent: evt.target.result,
-        loading: false,
-      });
-    };
-    reader.readAsText(file);
-  }
-
-  resetFile = () => {
-    this.setState({ fileName: '', fileContent: '', analyzeState: '' });
-  };
-
-  handleAnalyze = () => {
-    this.setState({ analyzeState: 'loading' }, () => {
-      Promise.resolve(this.props.onAnalyze(this.state.fileContent)).finally(() =>
-        this.setState({ analyzeState: 'done' }),
-      );
-    });
+  handleAnalyze = async () => {
+    this.setState({ analyzed: false });
+    await this.props.onAnalyze(this.state.file);
+    this.setState({ analyzed: true });
   };
 
   handleDownload = () => {
-    const blob = new Blob(['Отчёт с данными...'], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'report.txt';
-    a.click();
-    URL.revokeObjectURL(url);
+    // скачиваем report.txt с бэка
+    window.location.href = '/api/report';
   };
 
   render() {
-    const { dragActive, fileName, loading, analyzeState } = this.state;
+    const { dragActive, file, analyzed } = this.state;
+    const { loading } = this.props;
     const zonesWidth = `calc(743.5px * 2 + 37px)`;
 
     return (
@@ -81,7 +55,9 @@ export default class FileUploader extends Component {
         <div className="steps">
           <div className="step">
             <span>1</span>
-            <p>Подготовьте файл в формате CSV, Excel или TXT с колонкой “review”</p>
+            <p>
+              Подготовьте файл в формате CSV, Excel или TXT с колонкой <strong>“review”</strong>
+            </p>
           </div>
           <div className="step">
             <span>2</span>
@@ -99,18 +75,29 @@ export default class FileUploader extends Component {
           onDragEnter={this.onDragEnter}
           onDragOver={this.onDragOver}
           onDragLeave={this.onDragLeave}
-          onDrop={this.onDrop}>
-          {!dragActive && !fileName && (
+          onDrop={this.onDrop}
+        >
+          {!dragActive && !file && (
             <>
               <div className="zone zone--drag">
                 <img src={uploadIcon} alt="Upload" />
                 <p>Перетащите</p>
               </div>
               <div className="zone zone--browse">
-                <p>Или выберите файл в формате CSV, Excel, TXT</p>
+                <p>
+                  <span className="browse-title">Или выберите файл</span>
+                  <span className="browse-formats">
+                    {' '}
+                    в формате CSV, Excel, TXT
+                  </span>
+                </p>
                 <label className="browse-button">
                   Выбрать файл
-                  <input type="file" accept=".csv,.xlsx,.txt" onChange={this.onFileChange} />
+                  <input
+                    type="file"
+                    accept=".csv,.xlsx,.txt"
+                    onChange={this.onFileChange}
+                  />
                 </label>
               </div>
             </>
@@ -123,39 +110,43 @@ export default class FileUploader extends Component {
             </div>
           )}
 
-          {fileName && !loading && (
-            <div className="zone zone--file-info" style={{ width: zonesWidth / 2 }}>
+          {file && !dragActive && (
+            <div
+              className="zone zone--file-info"
+              style={{ width: zonesWidth / 2 }}
+            >
               <div className="filename">
                 <img src={fileIcon} alt="Файл" />
-                <span>{fileName}</span>
+                <span>{file.name}</span>
               </div>
-              <button onClick={this.resetFile}>✕</button>
-            </div>
-          )}
-
-          {loading && (
-            <div className="zone zone--loading" style={{ width: zonesWidth / 2 }}>
-              <div className="spinner" />
-              <p>Немного подождите...</p>
+              <button onClick={() => this.setState({ file: null, analyzed: false })}>
+                ✕
+              </button>
             </div>
           )}
         </div>
 
-        {/* ====== Кнопки под областью загрузки ====== */}
-        {fileName && !loading && analyzeState === '' && (
-          <button className="action-btn analyze-btn" onClick={this.handleAnalyze}>
+        {/* Кнопки */}
+        {file && !loading && !analyzed && (
+          <button
+            className="action-btn analyze-btn"
+            onClick={this.handleAnalyze}
+          >
             Проанализировать
           </button>
         )}
-        {analyzeState === 'loading' && (
-          <button className="action-btn analyze-btn loading">
+        {loading && (
+          <button className="action-btn analyze-btn loading" disabled>
             <div className="spinner small" />
             <span>Немного подождите</span>
           </button>
         )}
-        {analyzeState === 'done' && (
-          <button className="action-btn download-btn" onClick={this.handleDownload}>
-            Скачать файл
+        {analyzed && !loading && (
+          <button
+            className="action-btn download-btn"
+            onClick={this.handleDownload}
+          >
+            Скачать отчет
           </button>
         )}
       </div>

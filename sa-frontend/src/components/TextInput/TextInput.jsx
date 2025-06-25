@@ -13,17 +13,22 @@ class TextInput extends Component {
   };
 
   render() {
+    const { loading } = this.props;
     return (
       <div className="text-input">
         <textarea
           placeholder="Введите текст..."
           value={this.state.text}
           onChange={this.handleChange}
+          disabled={loading}
         />
         <button
           className="analyze-button"
           onClick={this.handleAnalyze}
-        >Проверить</button>
+          disabled={loading}
+        >
+          {loading ? 'Проверяем...' : 'Проверить'}
+        </button>
       </div>
     );
   }

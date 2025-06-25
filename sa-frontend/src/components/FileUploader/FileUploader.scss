@@ -2,12 +2,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 
-  /* === инструкции 1–2–3 сверху === */
   .steps {
     display: flex;
-    gap: 80px;
-    margin-bottom: 24px;
+    gap: 40px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    @media (min-width: 1600px) {
+      gap: 80px;
+      margin-bottom: 24px;
+      flex-wrap: nowrap;
+    }
 
     .step {
       display: flex;
@@ -19,73 +27,138 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         border: 2px solid #7B3AED;
         border-radius: 50%;
         color: #7B3AED;
-        font-size: 20px;
-        margin-bottom: 8px;
+        font-size: 18px;
+        margin-bottom: 6px;
+
+        @media (min-width: 1600px) {
+          width: 40px;
+          height: 40px;
+          font-size: 20px;
+          margin-bottom: 8px;
+        }
       }
 
       p {
-        max-width: 200px;
-        font-size: 16px;
+        max-width: 160px;
+        font-size: 14px;
         color: #333;
+
+        @media (min-width: 1600px) {
+          max-width: 200px;
+          font-size: 16px;
+        }
       }
     }
   }
 
   .zones {
     display: flex;
-    gap: 37px;                /* теперь именно 37px между карточками */
-    width: calc(743.5px * 2 + 37px);
-    padding: 41px 54px;
-    border-radius: 30px;
+    gap: 20px;
+    width: 100%;
+    max-width: 1000px;
+    padding: 30px;
+    border-radius: 25px;
     position: relative;
     justify-content: center;
+    flex-wrap: nowrap;
 
+    @media (min-width: 1600px) {
+      gap: 37px;
+      width: calc(743.5px * 2 + 37px);
+      padding: 41px 54px;
+      border-radius: 30px;
+      flex-wrap: nowrap;
+    }
 
     .zone {
-      width: 743.5px;         /* фиксированная ширина каждой карточки */
-      height: 458px;
+      width: 100%;
+      max-width: 600px;
+      height: 380px;
       background: #F9F4F4;
-      border-radius: 30px;
+      border-radius: 25px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 24px;
+      gap: 20px;
       text-align: center;
       transition: all 0.3s;
-      box-shadow: 10px 5px 15px #959da533;
+      box-shadow: 8px 4px 12px #959da533;
+
+      @media (min-width: 1600px) {
+        width: 743.5px;
+        height: 458px;
+        border-radius: 30px;
+        gap: 24px;
+        box-shadow: 10px 5px 15px #959da533;
+      }
 
       img {
-        width: 156px;
-        height: 156px;
+        width: 120px;
+        height: 120px;
+
+        @media (min-width: 1600px) {
+          width: 156px;
+          height: 156px;
+        }
       }
+
       p {
-        font-size: 24px;
+        font-size: 20px;
         color: #333;
+
+        @media (min-width: 1600px) {
+          font-size: 24px;
+        }
       }
     }
 
-    /* Кнопка Browse внутри второй карточки */
+    .zone--browse {
+      p {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px; // небольшой отступ между строками
+        
+        .browse-title {
+          font-weight: 700;
+          font-size: 24px; // или ваш размер шрифта
+        }
+        
+        .browse-formats {
+          font-weight: 400;
+          font-size: 16px; // можно сделать немного меньше
+        }
+      }
+    }
     .zone--browse .browse-button {
       margin-top: 8px;
       background: #7B3AED;
       color: #fff;
       border: none;
-      border-radius: 30px;
-      padding: 12px 32px;
-      font-size: 20px;
+      border-radius: 25px;
+      padding: 10px 25px;
+      font-size: 18px;
       cursor: pointer;
       position: relative;
 
+      @media (min-width: 1600px) {
+        border-radius: 30px;
+        padding: 12px 32px;
+        font-size: 20px;
+      }
+
       input[type='file'] {
         position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         opacity: 0;
         cursor: pointer;
       }
@@ -93,56 +166,77 @@
 
     &.zones--active {
       background: #7B3AED;
-  
-      /* скрываем обе обычные zone */
-      .zone { display: none; }
-  
-      /* показываем единственную drag-active и делаем её прозрачной */
+
+      .zone {
+        display: none;
+      }
+
       .zone--drag-active {
         display: flex;
         width: 100%;
-        background: transparent;      // <- убираем светлый фон
+        background: transparent;
         color: #fff;
-  
+
         img, p {
           filter: brightness(0) invert(1);
         }
       }
     }
 
-
     .zone--file-info {
       grid-column: 1 / -1;
       background: #fff;
-      width: 738px;
-      height: 112px;
-      border-radius: 12px;
-      padding: 12px 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 600px;
+      height: 90px;
+      border-radius: 10px;
+      padding: 10px 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
 
+      @media (min-width: 1600px) {
+        width: 738px;
+        height: 112px;
+        border-radius: 12px;
+        padding: 12px 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
       .filename {
         display: flex;
-        font-size: 20px;
+        font-size: 16px;
         color: #333;
         font-weight: bold;
+
+        @media (min-width: 1600px) {
+          font-size: 20px;
+        }
       }
 
       button {
         background: none;
         border: none;
-        font-size: 20px;
+        font-size: 16px;
         font-weight: bold;
         cursor: pointer;
         color: #7C3AED;
-        // box-shadow: 10px 5px 15px #959da533;
+
+        @media (min-width: 1600px) {
+          font-size: 20px;
+        }
       }
-      img{
-        width: 63px;
-        height: 63px;
+
+      img {
+        width: 50px;
+        height: 50px;
+
+        @media (min-width: 1600px) {
+          width: 63px;
+          height: 63px;
+        }
       }
     }
 
@@ -157,77 +251,106 @@
         border: 4px solid rgba(255,255,255,0.3);
         border-top: 4px solid #fff;
         border-radius: 50%;
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
         animation: spin 1s linear infinite;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
+
+        @media (min-width: 1600px) {
+          width: 40px;
+          height: 40px;
+          margin-bottom: 12px;
+        }
       }
 
       p {
-        font-size: 24px;
-      }
-    }
-  }
-  /* ------------------------------------------------ */
-/* кнопки Проанализировать / Немного подождите / Скачать */
-/* ------------------------------------------------ */
-.action-btn {
-  margin-top: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;              // расстояние между спиннером и текстом
-  width: 348px;
-  height: 81px;
-  border-radius: 80px;
-  padding: 24px;
-  font-size: 24px;
-  cursor: pointer;
-  transition: background 0.3s;
-  box-shadow: 10px 5px 15px #959da533;
+        font-size: 20px;
 
-  &.analyze-btn {
-    background: #7B3AED;
-    color: #fff;
-
-    &:hover { background: #A273F2; }
-
-    &.loading {
-      background: #EFE8FD;
-      color: #333;
-
-      &:hover { background: #E0DBF5; }
-
-      .spinner.small {
-        border: 4px solid rgba(0,0,0,0.1);
-        border-top: 4px solid #333;
-        width: 24px;
-        height: 24px;
+        @media (min-width: 1600px) {
+          font-size: 24px;
+        }
       }
     }
   }
 
-  &.download-btn {
-    background: #7B3AED;
-    color: #fff;
+  .action-btn {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+    height: 70px;
+    border-radius: 70px;
+    padding: 20px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+    box-shadow: 8px 4px 12px #959da533;
 
-    &:hover { background: #A273F2; }
+    @media (min-width: 1600px) {
+      margin-top: 24px;
+      gap: 16px;
+      width: 348px;
+      height: 81px;
+      border-radius: 80px;
+      padding: 24px;
+      font-size: 24px;
+      box-shadow: 10px 5px 15px #959da533;
+    }
+
+    &.analyze-btn {
+      background: #7B3AED;
+      color: #fff;
+
+      &:hover {
+        background: #A273F2;
+      }
+
+      &.loading {
+        background: #EFE8FD;
+        color: #333;
+
+        &:hover {
+          background: #E0DBF5;
+        }
+
+        .spinner.small {
+          border: 4px solid rgba(0,0,0,0.1);
+          border-top: 4px solid #333;
+          width: 20px;
+          height: 20px;
+
+          @media (min-width: 1600px) {
+            width: 24px;
+            height: 24px;
+          }
+        }
+      }
+    }
+
+    &.download-btn {
+      background: #7B3AED;
+      color: #fff;
+
+      &:hover {
+        background: #A273F2;
+      }
+    }
   }
-}
 
-/* маленький спиннер для кнопки */
-.spinner.small {
-  border: 4px solid rgba(255,255,255,0.3);
-  border-top: 4px solid #fff;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
-}
+  .spinner.small {
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
 
-}
-
-/* анимация спиннера */
-@keyframes spin {
-  to { transform: rotate(360deg); }
+    @media (min-width: 1600px) {
+      width: 24px;
+      height: 24px;
+    }
+  }
 }

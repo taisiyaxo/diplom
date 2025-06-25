@@ -1,14 +1,12 @@
 from flask import Flask, request, jsonify, send_file
 import pandas as pd
 import os
-import io
 
-# Импорт для работы с nltk и RAKE
+from flask_cors import CORS
 import nltk
 from nltk.corpus import stopwords
 from rake_nltk import Rake
 
-# Если стоп-слова ещё не скачаны – скачиваем.
 nltk.download('stopwords')
 russian_stopwords = stopwords.words("russian")
 
@@ -107,8 +105,11 @@ from deeppavlov import build_model, configs
 
 sentiment_model = build_model(configs.classifiers.rusentiment_bert, download=True)
 
-# Инициализируем Flask-приложение
+
+
 app = Flask(__name__)
+CORS(app)  # разрешает все источники
+
 
 
 # Эндпоинт для анализа одного текстового отзыва

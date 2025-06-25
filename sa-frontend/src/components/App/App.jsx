@@ -1,37 +1,54 @@
-// src/components/App/App.jsx
 import React, { Component } from 'react';
 import TextInput from '../TextInput/TextInput';
 import FileUploader from '../FileUploader/FileUploader';
 import EmotionCard from '../EmotionCard/EmotionCard';
 import textIcon from '../../assets/icons/text.png';
 import fileIcon from '../../assets/icons/file.png';
+import { analyzeText, uploadFile } from '../../utils/api';
 import './App.scss';
+
 
 export default class App extends Component {
   state = {
-    mode: 'text',     // 'text' или 'file'
-    emotion: ''       // '', 'Позитив', 'Нейтральный', 'Негатив', 'Ошибка'
+    mode: 'text',       // 'text' или 'file'
+    emotion: '',        // '', 'Позитив', 'Нейтральный', 'Негатив', 'Ошибка'
+    loading: false
   };
 
   handleModeChange = (mode) => {
     this.setState({ mode, emotion: '' });
   };
 
-  handleAnalyzeText = (text) => {
-    // Здесь вместо заглушки можно вызвать реальный API
-    const rnd = Math.floor(Math.random() * 3);
-    const map = ['Позитив', 'Нейтральный', 'Негатив'];
-    this.setState({ emotion: map[rnd] });
+  handleAnalyzeText = async (text) => {
+    this.setState({ loading: true, emotion: '' });
+    try {
+      const res = await analyzeText(text);
+      this.setState({ emotion: res.sentiment });
+    } catch (e) {
+      console.error(e);
+      this.setState({ emotion: 'Ошибка' });
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
-  handleAnalyzeFile = (fileContent) => {
-    // для файлов передаём в тот же метод анализа
-    this.handleAnalyzeText(fileContent);
+  handleAnalyzeFile = async (file) => {
+    this.setState({ loading: true, emotion: '' });
+    try {
+      const res = await uploadFile(file);
+      // для file-режима мы сохраняем эмоцию, но рендерим карточку только в text-mode
+      const first = Array.isArray(res.results) && res.results[0];
+      this.setState({ emotion: first?.sentiment || 'Ошибка' });
+    } catch (e) {
+      console.error(e);
+      this.setState({ emotion: 'Ошибка' });
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
   render() {
-    const { mode, emotion } = this.state;
-
+    const { mode, emotion, loading } = this.state;
     return (
       <div className="app">
         <header className="header">
@@ -57,14 +74,19 @@ export default class App extends Component {
         <main className="main">
           {mode === 'text' && (
             <>
-              <TextInput onAnalyze={this.handleAnalyzeText} />
-              {/* Всегда показываем карточку в текстовом режиме */}
+              <TextInput
+                onAnalyze={this.handleAnalyzeText}
+                loading={loading}
+              />
               <EmotionCard emotion={emotion} />
             </>
           )}
 
           {mode === 'file' && (
-            <FileUploader onAnalyze={this.handleAnalyzeFile} />
+            <FileUploader
+              onAnalyze={this.handleAnalyzeFile}
+              loading={loading}
+            />
           )}
         </main>
       </div>

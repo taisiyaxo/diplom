@@ -2,55 +2,91 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 20px;
+  padding: 30px 15px;
   min-height: 100vh;
+
+  @media (min-width: 1600px) {
+    padding: 40px 20px;
+  }
 
   .header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+
+    @media (min-width: 1600px) {
+      margin-bottom: 40px;
+    }
 
     h1 {
-      font-size: 20px;
-      // font-family: Montserrat;
+      font-size: 18px;
       color: #4361ee;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
+
+      @media (min-width: 1600px) {
+        font-size: 20px;
+        margin-bottom: 20px;
+      }
     }
 
     .mode-switch {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      gap: 28.52px;
-      width: 494px;
-      height: 103px;
-      border-radius: 33px;
+      gap: 20px;
+      width: 100%;
+      max-width: 494px;
+      height: auto;
+      min-height: 80px;
+      border-radius: 28px;
       background-color: #efe8fd;
+      padding: 10px;
+
+      @media (min-width: 1600px) {
+        gap: 28.52px;
+        height: 103px;
+        border-radius: 33px;
+        padding: 0;
+      }
 
       button {
-        display: flex; // <— делаем флексом
-        align-items: center; // <— вертикально центрируем
-        justify-content: center; // <— горизонтально центрируем
-        gap: 10px; // <— расстояние между иконкой и текстом
-
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         background-color: #efe8fd;
         border: none;
-        width: 210px;
-        height: 74px;
-        border-radius: 18px;
-        padding: 21px 30px;
-        font-size: 24px;
+        width: 48%;
+        max-width: 210px;
+        height: 60px;
+        border-radius: 15px;
+        padding: 15px 20px;
+        font-size: 20px;
         color: #222222;
         cursor: pointer;
         transition: background-color 0.3s;
+
+        @media (min-width: 1600px) {
+          // gap: 10px;
+          height: 74px;
+          border-radius: 18px;
+          padding: 21px 30px;
+          font-size: 24px;
+          margin: 10px;
+        }
 
         &.active {
           background-color: #ffffff;
         }
 
         .mode-icon {
-          width: 24px;
-          height: 24px;
-          flex-shrink: 0; // чтобы иконка не сжималась
+          width: 20px;
+          height: 20px;
+          flex-shrink: 0;
+
+          @media (min-width: 1600px) {
+            width: 24px;
+            height: 24px;
+          }
         }
       }
     }
@@ -58,10 +94,16 @@
 
   .main {
     display: flex;
-    gap: 80px;
+    gap: 40px;
     width: 100%;
-    max-width: 1920px;
-    max-height: 1020px;
-    justify-content: center;  
+    max-width: 1600px;
+    justify-content: center;
+    flex-wrap: wrap;
+
+    @media (min-width: 1600px) {
+      gap: 80px;
+      max-width: 1920px;
+      flex-wrap: nowrap;
+    }
   }
 }
